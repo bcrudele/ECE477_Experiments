@@ -59,13 +59,13 @@ while(1):
         cv.imshow('gfg', img2)
         # i want to see histogram
 
-        plt.clf()  # Clear the previous plot
-        plt.plot(roi_hist)  # Plot the normalized histogram
-        plt.xlabel('HSV Hue values')
-        plt.ylabel('Frequency')
-        plt.title('HSV Histogram of ROI at time ' + str(time.time()))
-        plt.draw()  # Redraw the plot
-        plt.pause(0.01)  
+        # plt.clf()  # Clear the previous plot
+        # plt.plot(roi_hist)  # Plot the normalized histogram
+        # plt.xlabel('HSV Hue values')
+        # plt.ylabel('Frequency')
+        # plt.title('HSV Histogram of ROI at time ' + str(time.time()))
+        # plt.draw()  # Redraw the plot
+        # plt.pause(0.01)  
 
         k = cv.waitKey(30) & 0xff
         if k == 27:
