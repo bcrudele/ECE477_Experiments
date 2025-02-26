@@ -1,30 +1,40 @@
 import cv2
 import numpy as np
 
-# Read the image
-image = cv2.imread("image.jpg")
+cap = cv2.VideoCapture(0)
 
-# Convert the image to HSV (Hue, Saturation, Value)
-hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+# Set lower resolution for better performance
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+cap.set(cv2.CAP_PROP_FPS, 30)  # Try increasing FPS
 
-# Define the range for the orange color in HSV
-# These values are approximate, adjust if necessary
-orangeLower = (5, 150, 150)  # Lower bound for orange (light orange)
-orangeUpper = (15, 255, 255)  # Upper bound for orange (dark orange)
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        print("Failed to grab frame")
+        continue  # Skip processing if frame is invalid
 
-# Create a mask that isolates the orange color
-mask = cv2.inRange(hsv_image, orangeLower, orangeUpper)
+    # Convert frame to HSV
+    hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-# Bitwise-AND the mask with the original image to isolate the orange regions
-result = cv2.bitwise_and(image, image, mask=mask)
+    # Define orange color range
+    orangeLower = (5, 150, 150)
+    orangeUpper = (15, 255, 255)
 
-# Show the original image, mask, and the result
-cv2.imshow("Original Image", image)
-cv2.imshow("Mask", mask)
-cv2.imshow("Orange Isolated", result)
+    # Create mask and apply bitwise AND
+    mask = cv2.inRange(hsv_image, orangeLower, orangeUpper)
+    result = cv2.bitwise_and(frame, frame, mask=mask)
 
-# Save the result
-cv2.imwrite("orange_isolated.jpg", result)
+    # Show result
+    cv2.imshow("Orange Isolated", result)
 
-cv2.waitKey(0)
+    # Save only when 's' is pressed to avoid lag
+    if cv2.waitKey(1) & 0xFF == ord('s'):
+        cv2.imwrite("orange_isolated.jpg", result)
+
+    # Exit on 'q'
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
 cv2.destroyAllWindows()
