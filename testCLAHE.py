@@ -1,92 +1,138 @@
-# Import required packages
-from collections import deque
-from imutils.video import VideoStream
-import numpy as np
-import argparse
+# from collections import deque
+# from imutils.video import VideoStream
+# import numpy as np
+# import cv2
+# import argparse
+# import time
+# import imutils
+
+
+# ap = argparse.ArgumentParser()
+# ap.add_argument("-v", "--video", help="Path to the (optional) video file")
+# ap.add_argument("-b", "--buffer", default=64, type=int, help="max buffer size")
+# args = vars(ap.parse_args())
+
+# orangeLower = (16, 100, 100)
+# orangeUpper = (6, 100, 96)
+# pts = deque(maxlen=args["buffer"])
+
+# if not args.get("video", False):
+#     vs = VideoStream(src=0).start()
+# else:
+#     vs = cv2.VideoCapture(args["video"])
+
+# time.sleep(2.0)
+
+
+# while True:
+#     frame = vs.read()
+#     frame = frame[1] if args.get("video", False) else frame
+#     if frame is None:
+#         break
+
+    # frame = imutils.resize(frame, width=600)
+    # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+    # hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+    # print(hsv)
+    # mask = cv2.inRange(hsv, orangeLower, orangeUpper)
+    # mask = cv2.erode(mask, None, iterations=2)
+    # mask = cv2.dilate(mask, None, iterations=2)
+    # if(mask is not None):
+    #     print("mask found")
+    # cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # cnts = imutils.grab_contours(cnts)
+    # center = None
+
+    # if len(cnts) > 0:
+    #     print("found")
+    #     c = max(cnts, key=cv2.contourArea)
+    #     ((x, y), radius) = cv2.minEnclosingCircle(c)
+    #     M = cv2.moments(c)
+    #     center = (int(M['m10']/M['m00']), int(M['m01']/M['m00']))
+
+    #     if radius > 10:
+    #         cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
+    #         cv2.circle(frame, center, 5, (0, 0, 255), -1)
+
+#     pts.append(center)
+
+#     for i in range(1, len(pts)):
+#         if pts[i-1] is None or pts[i] is None:
+#             continue
+
+#         thickness = int(np.sqrt(args["buffer"] / float(i+1)) * 2.5)
+#         cv2.line(frame, pts[i-1], pts[i], (0, 0, 255), thickness)
+
+#     cv2.imshow("Frame", frame)
+#     key = cv2.waitKey(1) & 0xFF
+
+#     if key == ord('q'):
+#         break
+
+# if not args.get("video", False):
+#     vs.stop()
+# else:
+#     vs.release()
+
+
+# cv2.destroyAllWindows()
+
+# import cv2
+# import numpy as np
+ 
+# # Reading the image from the present directory
+# image = cv2.imread("image.jpg")
+
+# # Resizing the image for compatibility
+# image = cv2.resize(image, (500, 600))
+ 
+# # The initial processing of the image
+# # image = cv2.medianBlur(image, 3)
+# image_bw = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+ 
+# # The declaration of CLAHE
+# # clipLimit -> Threshold for contrast limiting
+# clahe = cv2.createCLAHE(clipLimit=5)
+# final_img = clahe.apply(image_bw) + 30
+ 
+# # Ordinary thresholding the same image
+# _, ordinary_img = cv2.threshold(image_bw, 155, 255, cv2.THRESH_BINARY)
+ 
+# # Showing the two images
+# cv2.imshow("ordinary threshold", ordinary_img)
+# cv2.imshow("CLAHE image", final_img)
+
 import cv2
-import imutils
-import time
+import numpy as np
 
-# Define command-line arguments (only for buffer size since no video file is used)
-ap = argparse.ArgumentParser()
-ap.add_argument("-b", "--buffer", type=int, default=64, help="max buffer size")
-args = vars(ap.parse_args())
+# Reading the image from the present directory
+image = cv2.imread("image.jpg")
 
-# Define HSV color boundaries for tracking the ball (green by default)
-hsvLow = (8.1, 94, 84)
-hsvHigh = (10, 100, 90)
+# Check if the image is loaded successfully
+if image is None:
+    print("Error: Could not read image. Check the file path.")
+    exit()
 
-# Initialize deque to store tracked points
-pts = deque(maxlen=args["buffer"])
+# Resizing the image for compatibility
+image = cv2.resize(image, (500, 600))
 
-# Start the video stream from the webcam
-print("[INFO] Starting live video stream...")
-vs = VideoStream(src=0).start()
-time.sleep(2.0)  # Allow the camera to warm up
+# Convert to grayscale
+image_bw = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-# Start looping to process frames
-while True:
-    # Read the frame from the webcam
-    frame = vs.read()
-    #if(frame is not None): print("read frame")
+# Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
+clahe = cv2.createCLAHE(clipLimit=5)
+final_img = clahe.apply(image_bw) + 30
 
-    # If frame is None, break (happens if the camera disconnects)
-    if frame is None:
-        break
+# Ordinary thresholding
+_, ordinary_img = cv2.threshold(image_bw, 180, 255, cv2.THRESH_BINARY)
 
-    # Resize frame for consistency
-    frame = imutils.resize(frame, width=600)
+# Save the processed images to files
+cv2.imwrite("CLAHE_output180.jpg", final_img)
+cv2.imwrite("threshold_output180.jpg", ordinary_img)
 
-    # Apply Gaussian Blur to reduce noise
-    #blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+# Display the images
+cv2.imshow("Ordinary Threshold", ordinary_img)
+cv2.imshow("CLAHE Image", final_img)
 
-    # Convert frame to HSV color space
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    # Create a mask to detect the ball based on color range
-    mask = cv2.inRange(hsv, hsvLow, hsvHigh)
-    mask = cv2.erode(mask, None, iterations=2)
-    mask = cv2.dilate(mask, None, iterations=2)
-    if(mask is not None): print("mask found")
-    # Find contours in the mask
-    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cnts = imutils.grab_contours(cnts)
-    center = None
-
-    # Process contours if found
-    if len(cnts) > 0:
-        # Find the largest contour
-        c = max(cnts, key=cv2.contourArea)
-        ((x, y), radius) = cv2.minEnclosingCircle(c)
-        M = cv2.moments(c)
-
-        # Avoid division by zero when computing the centroid
-        if M["m00"] != 0:
-            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-
-        # Draw the circle and center point if the ball is big enough
-        if radius > 5:
-            cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-            if center:
-                #cv2.circle(frame, center, 5, (0, 0, 255), -1)
-    # Update the list of tracked points
-                pts.appendleft(center)
-
-    # Draw the tracking line
-    for i in range(1, len(pts)):
-        if pts[i - 1] is None or pts[i] is None:
-            # continue
-            thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
-            cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
-
-    # Show the frame
-    cv2.imshow("Ball Tracking", frame)
-    key = cv2.waitKey(1) & 0xFF
-
-    # Exit on pressing 'q'
-    if key == ord("q"):
-        break
-
-# Cleanup and release the camera
-vs.stop()
+cv2.waitKey(0)
 cv2.destroyAllWindows()
