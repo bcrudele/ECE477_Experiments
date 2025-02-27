@@ -16,7 +16,7 @@ while True:
     
     # Convert frame to HSV color space
     hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-    
+    hsv[..., 2] = cv.createCLAHE(clipLimit=5).apply(hsv[..., 2]) 
     # Create mask for orange color
     mask = cv.inRange(hsv, np.array(orangeLower), np.array(orangeUpper))
     
