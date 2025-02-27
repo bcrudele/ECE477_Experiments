@@ -1,13 +1,15 @@
 import numpy as np
 import cv2 as cv
 
+direction = [0,0]
+
 # Setup camera
 cap = cv.VideoCapture(0)
 width = cap.get(cv.CAP_PROP_FRAME_WIDTH)
 height = cap.get(cv.CAP_PROP_FRAME_HEIGHT)
 bound = 0.10
 width_lower_bound = width - (bound * width)
-width_upper_bound = width + (bound * width)
+width_upper_bound = 0 + (bound * width)
 height_lower_bound = height - (bound * height)
 height_upper_bound = height + (bound * height)
 print("Camera dimensions:", (width, height)) 
@@ -40,15 +42,18 @@ while True:
             cx = int(M["m10"] / M["m00"])
             cy = int(M["m01"] / M["m00"])
             cv.circle(frame, (cx, cy), 5, (0, 255, 0), -1)
-            cv.putText(frame, f"({cx}, {cy})", (cx + 10, cy - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            if(cx < width_lower_bound):
-                print("move right")
-            elif(cx > width_lower_bound):
-                print("move left")
-            elif (cy > height_lower_bound):
-                print("move up")
-            elif (cy < height_upper_bound):
-                print("move down")
+            cv.putText(frame, f"({cx}, {cy})", (cx + 10, cy - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2) 
+            if (cx > width_lower_bound):
+                if (not direction[1]):
+                    print("move right")
+                direction[0] = 0
+                direction[1] = cx > width_lower_bound # right
+            elif (cx < width_upper_bound):
+                if (not direction[0]):
+                    print("move left")
+                direction[0] = cx < width_upper_bound # right
+                direction[1] = 0
+
                 '''
                 0 -> 480 (down to up) (height)
                 0 -> 640 (left to right) (width)
